@@ -1,0 +1,42 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mongo-reviews-deployment
+  # namespace: namespace-db
+  labels:
+    app: mongo
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mongo-reviews
+  template:
+    metadata:
+      labels:
+        app: mongo-reviews
+    spec:
+      containers:
+      - name: mongodb
+        image: mongo:5.0
+        ports:
+        - containerPort: 27017
+        volumeMounts:
+          - name: mongodb-data
+            mountPath: /docker-entrypoint-initdb.d
+      volumes:
+        - name: mongodb-data
+          hostPath:
+            path: /home/cristianeduardo/Projects/kubernetes/book-store/db
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mongo-reviews-service
+spec:
+  type: ClusterIP
+  selector:
+    app: mongo-reviews
+  ports:
+    - protocol: TCP
+      port: 27017
+      targetPort: 27017
